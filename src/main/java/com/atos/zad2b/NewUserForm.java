@@ -1,5 +1,7 @@
 package com.atos.zad2b;
 
+import java.util.List;
+
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -43,13 +45,13 @@ public class NewUserForm {
 		loginTextField.setPromptText("Enter your new login");
 		GridPane.setConstraints(loginTextField, 0, 1);
 
-		//Label has≥o
+		//Label has≈Ço
 		Label passwordLabel = new Label("Password");
 		passwordLabel.setMaxWidth(Double.MAX_VALUE);
 		passwordLabel.setAlignment(Pos.CENTER);
 		GridPane.setConstraints(passwordLabel, 0, 2);		
 
-		//Pole tekstowe has≥a
+		//Pole tekstowe has≈Ça
 		final TextField passwordTextField = new TextField();
 		passwordTextField.setPromptText("Enter your new password");
 		GridPane.setConstraints(passwordTextField, 0,3);
@@ -60,7 +62,7 @@ public class NewUserForm {
 		descriptionLabel.setAlignment(Pos.CENTER);
 		GridPane.setConstraints(descriptionLabel, 0, 4);		
 
-		//Pole tekstowe has≥a
+		//Pole tekstowe has≈Ça
 		final TextField descriptionTextField = new TextField();
 		descriptionTextField.setPromptText("Please provide user description");
 		GridPane.setConstraints(descriptionTextField, 0,5);
@@ -73,14 +75,24 @@ public class NewUserForm {
 			public void handle(ActionEvent arg0) {
 				Alert alert = new Alert(Alert.AlertType.NONE, null);
 				alert.getDialogPane().getButtonTypes().add(ButtonType.OK);
+				
+				
+				if(verifyDuplicates(loginTextField.getText()) == true)
+				{
+					User user = new User(loginTextField.getText(), sha3.encrypt(passwordTextField.getText()), descriptionTextField.getText());
+					controler.insertUser(user);
+					alert.setContentText("Created new user");
 
+					alert.showAndWait();
+					secondStage.close();
+				}
+				else
+				{
+					alert.setContentText("User with such login already exist");
+					alert.showAndWait();
+				}
+				
 
-				User user = new User(loginTextField.getText(), sha3.encrypt(passwordTextField.getText()), descriptionTextField.getText());
-				controler.insertUser(user);
-				alert.setContentText("Created new user");
-
-				alert.showAndWait();
-				secondStage.close();
 			}
 		});
 		GridPane.setConstraints(newUserButton, 0,9);
@@ -108,6 +120,25 @@ public class NewUserForm {
 				);
 		secondForm.requestFocus();
 		secondStage.showAndWait();
+	}
+	
+	private boolean verifyDuplicates(String userName)
+	{
+		DatabaseControler controler = new DatabaseControler();
+		try{
+			List<User> users = controler.getAll();
+			for(int i=0; i<users.size(); i++)
+			{
+				if(userName.equals(users.get(i).getUserName()))
+				{
+					return false;
+				}
+			}
+		}
+		catch(Exception e){
+			System.out.println(e);
+		}
+		return true;
 	}
 
 }
